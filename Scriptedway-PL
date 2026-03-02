@@ -1,0 +1,34 @@
+node 
+{
+    ///var/lib/jenkins/tools/hudson.tasks.Maven_MavenInstallation/maven-3.9.8/bin/
+
+    def mavenHome=tool name: "maven-3.9.8"
+	stage('git checkout')
+	{
+	 git branch: 'development', url: 'https://github.com/hareesh2501/maven-webapplication-project-kkfunda.git'
+	}
+	stage('Maven build')
+	{
+	 sh "${mavenHome}/bin/mvn clean package"
+	}
+	stage('SQ Report')
+	{
+	 sh "${mavenHome}/bin/mvn sonar:sonar"
+	}
+	stage('Nexus')
+	{
+	 sh "${mavenHome}/bin/mvn deploy"
+	}
+	stage('Deploy to Tomcat') 
+    {
+      
+     sh """
+
+     curl -u hareesh:hari2311 \
+     --upload-file /var/lib/jenkins/workspace/IBBA-dev-scriptedway-PL/target/maven-web-application.war \
+     "http://15.206.146.142:8083/manager/text/deploy?path=/maven-web-application&update=true"
+          
+        """
+    }
+
+}  //node ending
